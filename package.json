@@ -1,0 +1,23 @@
+{
+  "name": "rstracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^2.18.0",
+    "@nuxthub/core": "^0.7.0",
+    "nuxt": "^3.14.0",
+    "vue": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "better-sqlite3": "^12.2.0",
+    "wrangler": "^3.78.0"
+  }
+}
