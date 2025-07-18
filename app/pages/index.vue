@@ -43,7 +43,7 @@
                   <div>
                     <h3 class="text-2xl font-bold text-white">{{ player.name }}</h3>
                     <div class="flex items-center space-x-2">
-                      <span class="text-white/80">Player {{ index + 1 }}</span>
+                      <span class="text-white/80">{{ player.name }}</span>
                       <span v-if="isLeader(player)" class="text-yellow-400">👑</span>
                     </div>
                   </div>
@@ -312,14 +312,14 @@ function getRowItems(row) {
       label: `${song.title} - ${song.artist}`
     },
     {
-      label: 'Update Player 1 Score',
+      label: `Update Garrett's Score`,
       icon: 'i-heroicons-user',
       onSelect() {
         openScoreModal(song.id, 1, song.player1_score, song.title, song.artist)
       }
     },
     {
-      label: 'Update Player 2 Score',
+      label: `Update Owen's Score`,
       icon: 'i-heroicons-user',
       onSelect() {
         openScoreModal(song.id, 2, song.player2_score, song.title, song.artist)
@@ -413,7 +413,7 @@ const columns = [
       return h(UButtonComponent, {
         color: 'neutral',
         variant: 'ghost',
-        label: 'Player 1',
+        label: 'Garrett',
         icon: isSorted
           ? isSorted === 'asc'
             ? 'i-lucide-arrow-up-narrow-wide'
@@ -454,7 +454,7 @@ const columns = [
       return h(UButtonComponent, {
         color: 'neutral',
         variant: 'ghost',
-        label: 'Player 2',
+        label: 'Owen',
         icon: isSorted
           ? isSorted === 'asc'
             ? 'i-lucide-arrow-up-narrow-wide'
