@@ -1,18 +1,103 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <!-- Header -->
-    <div class="bass-gradient">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="py-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <h1 class="text-3xl font-bold text-white">Bass Learning Tracker</h1>
-              <p class="text-blue-100 mt-1">Competition between {{ players?.results?.length || 0 }} players</p>
+    <!-- Enhanced Header with Background Image -->
+    <div class="bass-header min-h-[400px] flex items-center">
+      <!-- Animated Sound Wave Bars -->
+      <div class="sound-waves">
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+        <div class="wave-bar"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="py-12">
+          <!-- Main Title Section -->
+          <div class="text-center mb-12">
+            <h1 class="text-6xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
+              Bass Learning Tracker
+            </h1>
+            <p class="text-xl text-white/90 drop-shadow-md">
+              Epic Bass Competition • {{ songs?.results?.length || 0 }} Songs Challenge
+            </p>
+          </div>
+
+          <!-- Player Statistics and Race Visualization -->
+          <div class="grid md:grid-cols-2 gap-8 mb-8">
+            <!-- Player 1 Stats -->
+            <div v-for="(player, index) in players?.results || []" :key="player.id" 
+                 :class="['bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20',
+                         index === 0 ? 'ring-2 ring-blue-400/50' : 'ring-2 ring-purple-400/50']">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                  <div :class="['w-12 h-12 rounded-full flex items-center justify-center text-2xl',
+                               index === 0 ? 'bg-blue-500' : 'bg-purple-500']">
+                    🎸
+                  </div>
+                  <div>
+                    <h3 class="text-2xl font-bold text-white">{{ player.name }}</h3>
+                    <div class="flex items-center space-x-2">
+                      <span class="text-white/80">Player {{ index + 1 }}</span>
+                      <span v-if="isLeader(player)" class="text-yellow-400">👑</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Large Completion Number -->
+                <div class="text-right">
+                  <div class="text-5xl font-bold text-white drop-shadow-lg">
+                    {{ player.completed_songs }}
+                  </div>
+                  <div class="text-white/80 text-sm">completed</div>
+                </div>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div class="mb-3">
+                <div class="flex justify-between text-white/80 text-sm mb-2">
+                  <span>Progress</span>
+                  <span>{{ getCompletionPercentage(player) }}%</span>
+                </div>
+                <div class="progress-track">
+                  <div 
+                    :class="index === 0 ? 'progress-bar-player1' : 'progress-bar-player2'"
+                    :style="{ width: `${getCompletionPercentage(player)}%` }"
+                  ></div>
+                </div>
+              </div>
             </div>
-            <div class="flex space-x-4">
-              <div v-for="player in players.results" :key="player.id" class="text-center">
-                <div class="text-white font-medium">{{ player.name }}</div>
-                <div class="text-blue-100 text-sm">{{ player.completed_songs }} songs completed</div>
+          </div>
+
+          <!-- Race Visualization -->
+          <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+            <h3 class="text-xl font-bold text-white mb-4 text-center">🏁 Race to 50 Songs</h3>
+            <div class="space-y-4">
+              <div v-for="(player, index) in players?.results || []" :key="player.id" class="flex items-center space-x-4">
+                <div class="w-20 text-right">
+                  <span class="text-white font-medium">{{ player.name }}</span>
+                </div>
+                <div class="flex-1 relative">
+                  <div class="progress-track">
+                    <div 
+                      :class="index === 0 ? 'progress-bar-player1' : 'progress-bar-player2'"
+                      :style="{ width: `${getCompletionPercentage(player)}%` }"
+                    ></div>
+                  </div>
+                  <!-- Finish Line Marker -->
+                  <div class="absolute right-0 top-0 bottom-0 flex items-center">
+                    <div class="bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
+                      FINISH
+                    </div>
+                  </div>
+                </div>
+                <div class="w-12 text-white font-bold">
+                  {{ player.completed_songs }}/50
+                </div>
               </div>
             </div>
           </div>
@@ -98,6 +183,12 @@ const sorting = ref([
 
 const globalFilter = ref('')
 
+// Toast notifications (alternative approach without UNotifications)
+const showToast = (title, description) => {
+  // Simple alert-based notification for now
+  alert(`${title}\n${description}`)
+}
+
 // Score modal state
 const showScoreModal = ref(false)
 const modalProps = ref({
@@ -107,6 +198,9 @@ const modalProps = ref({
   songTitle: '',
   artist: ''
 })
+
+// Animation triggers
+const animationTriggers = ref(new Set())
 
 // Open score modal
 function openScoreModal(songId, playerId, currentScore, songTitle, artist) {
@@ -126,8 +220,87 @@ function handleModalClose() {
 }
 
 async function handleScoreSubmit(data) {
+  const oldPlayerData = players.value?.results?.find(p => p.id === data.playerId)
+  const oldCompletedCount = oldPlayerData?.completed_songs || 0
+  
   await updateScore(data.songId, data.playerId, data.score)
+  
+  // Check for celebrations if score >= 95%
+  if (data.score >= 95) {
+    const songData = songs.value?.results?.find(s => s.id === data.songId)
+    const playerData = players.value?.results?.find(p => p.id === data.playerId)
+    
+    if (songData && playerData) {
+      // Trigger animation for this specific cell
+      const animationKey = `${data.songId}-${data.playerId}`
+      animationTriggers.value.add(animationKey)
+      
+      // Remove animation trigger after animation completes
+      setTimeout(() => {
+        animationTriggers.value.delete(animationKey)
+      }, 1000)
+      
+      // Note: Celebration animations and notifications removed for now
+      // Can be re-enabled later when animation system is working properly
+    }
+  }
+  
   showScoreModal.value = false
+}
+
+// Helper functions for header display
+const getCompletionPercentage = (player) => {
+  const totalSongs = songs.value?.results?.length || 50
+  return Math.round((player.completed_songs / totalSongs) * 100)
+}
+
+const isLeader = (player) => {
+  if (!players.value?.results) return false
+  const maxCompleted = Math.max(...players.value.results.map(p => p.completed_songs))
+  return player.completed_songs === maxCompleted && player.completed_songs > 0
+}
+
+// Celebration functions
+const triggerConfetti = (playerId, element) => {
+  const colors = playerId === 1 ? ['confetti-blue', 'confetti-green'] : ['confetti-purple', 'confetti-yellow']
+  const rect = element.getBoundingClientRect()
+  
+  // Create confetti particles
+  for (let i = 0; i < 15; i++) {
+    const particle = document.createElement('div')
+    particle.className = `confetti-particle ${colors[Math.floor(Math.random() * colors.length)]}`
+    particle.style.left = `${rect.left + rect.width / 2}px`
+    particle.style.top = `${rect.top}px`
+    particle.style.animation = `confetti-fall ${1 + Math.random()}s ease-out forwards`
+    particle.style.animationDelay = `${Math.random() * 0.3}s`
+    
+    // Random horizontal spread
+    const spread = (Math.random() - 0.5) * 100
+    particle.style.setProperty('--spread', `${spread}px`)
+    
+    document.body.appendChild(particle)
+    
+    // Remove particle after animation
+    setTimeout(() => {
+      if (particle.parentNode) {
+        particle.parentNode.removeChild(particle)
+      }
+    }, 2000)
+  }
+}
+
+const showCompletionToast = (playerName, songTitle, milestone = null) => {
+  if (milestone) {
+    showToast(
+      `🏆 ${playerName} reached ${milestone} songs!`,
+      `Fantastic progress on this bass journey!`
+    )
+  } else {
+    showToast(
+      `🎉 ${playerName} completed "${songTitle}"!`,
+      `Another song mastered with 95%+ score!`
+    )
+  }
 }
 
 // Row action items for dropdown
@@ -254,11 +427,23 @@ const columns = [
       const score = row.original.player1_score
       const complete = row.original.player1_complete
       const scoreText = score ? `${score}%` : 'Not attempted'
-      const badgeClass = complete ? 'completed-badge' : 'pending-badge'
+      const animationKey = `${row.original.id}-1`
+      const shouldAnimate = animationTriggers.value.has(animationKey)
+      
+      let badgeClass = complete ? 'completed-badge' : 'pending-badge'
+      if (shouldAnimate) {
+        badgeClass += ' completed-celebration'
+      }
       
       return h('div', { class: 'flex items-center space-x-2' }, [
-        h('span', { class: badgeClass }, scoreText),
-        complete ? h('span', { class: 'text-green-600 text-xs' }, '✓') : null
+        h('span', { 
+          class: badgeClass,
+          key: shouldAnimate ? `animated-${Date.now()}` : 'static'
+        }, scoreText),
+        complete ? h('span', { 
+          class: shouldAnimate ? 'text-green-600 text-xs checkmark-bounce' : 'text-green-600 text-xs',
+          key: shouldAnimate ? `check-animated-${Date.now()}` : 'check-static'
+        }, '✓') : null
       ])
     }
   },
@@ -283,11 +468,23 @@ const columns = [
       const score = row.original.player2_score
       const complete = row.original.player2_complete
       const scoreText = score ? `${score}%` : 'Not attempted'
-      const badgeClass = complete ? 'completed-badge' : 'pending-badge'
+      const animationKey = `${row.original.id}-2`
+      const shouldAnimate = animationTriggers.value.has(animationKey)
+      
+      let badgeClass = complete ? 'completed-badge' : 'pending-badge'
+      if (shouldAnimate) {
+        badgeClass += ' completed-celebration'
+      }
       
       return h('div', { class: 'flex items-center space-x-2' }, [
-        h('span', { class: badgeClass }, scoreText),
-        complete ? h('span', { class: 'text-green-600 text-xs' }, '✓') : null
+        h('span', { 
+          class: badgeClass,
+          key: shouldAnimate ? `animated-${Date.now()}` : 'static'
+        }, scoreText),
+        complete ? h('span', { 
+          class: shouldAnimate ? 'text-green-600 text-xs checkmark-bounce' : 'text-green-600 text-xs',
+          key: shouldAnimate ? `check-animated-${Date.now()}` : 'check-static'
+        }, '✓') : null
       ])
     }
   },

@@ -30,8 +30,8 @@ CREATE TABLE progress (
 );
 
 -- Insert default players
-INSERT INTO players (name) VALUES ('Player 1');
-INSERT INTO players (name) VALUES ('Player 2');
+INSERT INTO players (name) VALUES ('Garrett');
+INSERT INTO players (name) VALUES ('Owen');
 
 -- Insert songs
 INSERT INTO songs (title, artist, year) VALUES
