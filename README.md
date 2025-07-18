@@ -24,17 +24,16 @@ A NuxtHub application for tracking bass learning progress between two players in
    npm install
    ```
 
-2. Initialize the database:
-   ```bash
-   node scripts/init-db.js
-   ```
-
-3. Start the development server:
+2. Start the development server with NuxtHub:
    ```bash
    npm run dev
+   # or directly:
+   npx nuxthub preview
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+**Note**: Use `npx nuxthub preview` instead of `nuxt dev` to enable Cloudflare D1 database and other NuxtHub features in development.
 
 ## API Routes
 
