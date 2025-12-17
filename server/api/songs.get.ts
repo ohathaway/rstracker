@@ -1,10 +1,10 @@
+import { sql } from 'drizzle-orm'
+
 export default defineEventHandler(async (event) => {
   try {
-    const db = hubDatabase()
-    
     // Get all songs with their completion status for both players
-    const result = db.prepare(`
-      SELECT 
+    const result = await db.run(sql`
+      SELECT
         s.id,
         s.ordinal,
         s.title,
@@ -21,9 +21,9 @@ export default defineEventHandler(async (event) => {
       LEFT JOIN progress p1 ON s.id = p1.song_id AND p1.player_id = 1
       LEFT JOIN progress p2 ON s.id = p2.song_id AND p2.player_id = 2
       ORDER BY s.ordinal ASC
-    `).all()
-    
-    return result.results || result
+    `)
+
+    return result.results
   } catch (error) {
     console.error('Error fetching songs:', error)
     throw createError({

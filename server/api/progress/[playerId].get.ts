@@ -1,17 +1,18 @@
+import { sql } from 'drizzle-orm'
+
 export default defineEventHandler(async (event) => {
   try {
-    const db = hubDatabase()
     const playerId = getRouterParam(event, 'playerId')
-    
+
     if (!playerId) {
       throw createError({
         statusCode: 400,
         statusMessage: 'playerId is required'
       })
     }
-    
-    const result = db.prepare(`
-      SELECT 
+
+    const result = await db.run(sql`
+      SELECT
         p.id,
         p.player_id,
         p.song_id,
@@ -24,11 +25,11 @@ export default defineEventHandler(async (event) => {
         s.year as song_year
       FROM progress p
       JOIN songs s ON p.song_id = s.id
-      WHERE p.player_id = ?1
+      WHERE p.player_id = ${playerId}
       ORDER BY p.created_at DESC
-    `).bind(playerId).all()
-    
-    return result.results || result
+    `)
+
+    return result.results
   } catch (error) {
     console.error('Error fetching progress:', error)
     throw createError({

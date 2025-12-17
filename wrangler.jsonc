@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "rstracker",
+  "main": "./.output/server/index.mjs",
+  "compatibility_date": "2025-12-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./.output/public/",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rstracker-db",
+      "database_id": "c499f70a-240e-49ed-a9bb-c9bc14c6dad7",
+      "migrations_dir": "server/db/migrations"
+    }
+  ]
+}

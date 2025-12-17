@@ -12,7 +12,12 @@
       "Bash(mv:*)",
       "Bash(rm:*)",
       "WebFetch(domain:hub.nuxt.com)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm add:*)",
+      "Bash(npx wrangler dev)",
+      "Bash(npx wrangler d1 migrations list:*)",
+      "Bash(npx wrangler:*)",
+      "Bash(timeout 5 curl:*)"
     ],
     "deny": []
   }
